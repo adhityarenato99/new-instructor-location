@@ -1,338 +1,189 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    
-        <script>
-            L_NO_TOUCH = false;
-            L_DISABLE_3D = false;
-        </script>
-    
-    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
-    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script>
+        L_NO_TOUCH = false;
+        L_DISABLE_3D = false;
+    </script>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.css"/>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
-    
-            <meta name="viewport" content="width=device-width,
-                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-            <style>
-                #map_71ff6b9f428616c5022917b8acc33301 {
-                    position: relative;
-                    width: 100.0%;
-                    height: 100.0%;
-                    left: 0.0%;
-                    top: 0.0%;
-                }
-            </style>
-        
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.css" />
 </head>
+
 <body>
-    
-    
-            <div class="folium-map" id="map_71ff6b9f428616c5022917b8acc33301" ></div>
-        
+    <div id="map"></div>
+
+    <script>
+        // Initialize the map
+        var map = L.map('map', {
+            center: [-2.5, 118.0],
+            zoom: 5
+        });
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+            maxZoom: 18
+        }).addTo(map);
+
+        // Reusable table filter function
+        function filterTable(tableId, inputId) {
+            var filter = document.getElementById(inputId).value.toUpperCase();
+            var rows = document.querySelectorAll(`#${tableId} tbody tr`);
+            rows.forEach(row => {
+                var cells = Array.from(row.getElementsByTagName('td'));
+                var match = cells.some(cell => cell.innerText.toUpperCase().indexOf(filter) > -1);
+                row.style.display = match ? '' : 'none';
+            });
+        }
+
+        // Add markers with popups
+        function addMarker(lat, lon, city, count, data) {
+            var tableRows = data.map(item => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.skill}</td>
+                </tr>
+            `).join('');
+
+            var popupContent = `
+                <b>City:</b> ${city}<br>
+                <b>Count:</b> ${count}<br>
+                <input type="text" id="search-${city}" onkeyup="filterTable('table-${city}', 'search-${city}')" placeholder="Search..." style="width: 100%; margin-bottom: 10px; padding: 5px;">
+                <div style="overflow-y: auto; max-height: 150px; border: 1px solid #ddd;">
+                    <table id="table-${city}" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Skill</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            L.marker([lat, lon]).addTo(map).bindPopup(popupContent);
+        }
+
+        // Add data for all cities
+        addMarker(-6.9175, 107.6191, 'Bandung', 2, [
+            { name: 'Rahmat Pradana', skill: 'English for Business' },
+            { name: 'Arfian Mauliddan', skill: 'Figma'}
+        ]);
+        addMarker(-6.8720, 107.5421, 'Cimahi', 1, [
+            { name: 'Rifky Nur Hidayat', skill: 'Solidwork' }
+        ]);
+        addMarker(-6.2088, 106.8456, 'Jakarta', 57, [
+            { name: 'Yani Suiswadi Rusdy', skill: 'English' },
+            { name: 'Nelly Budiarjo', skill: 'English' },
+            { name: 'Arditya Laksono', skill: 'English' },
+            { name: 'Floreance Sahertian', skill: 'English for Business' },
+            { name: 'Raden Nur Prasetyo', skill: 'English' },
+            { name: 'Indriani Putri Utami', skill: 'English, Excel, Word, PPT' },
+            { name: 'Kiki Soraya', skill: 'English' },
+            { name: 'Halimun Purnama', skill: 'Mandarin' },
+            { name: 'Yufan Dalius', skill: 'Mandarin' },
+            { name: 'Mardiana', skill: 'Marketing' },
+            { name: 'Putri Nur Hikmah', skill: 'Softskill Pedagogy' },
+            { name: 'Fransiska Hanita', skill: 'Accounting, Excel, Tax' },
+            { name: 'Mega Amalia', skill: 'Accounting, Excel, Tax' },
+            { name: 'Fahmi Hasan', skill: 'Office, PPT' },
+            { name: 'Panca Octavia', skill: 'Excel, Word, PPT' },
+            { name: 'Ali Baroroh', skill: 'Power BI, Office, Dashboard' },
+            { name: 'Yohan Mulyono', skill: 'CEH' },
+            { name: 'Aditya Kurniawan', skill: 'CEH' },
+            { name: 'Kevin', skill: 'CEH' },
+            { name: 'Santoso Budijono', skill: 'AWS' },
+            { name: 'Richard Win', skill: 'AWS' },
+            { name: 'Ivan Sebastian', skill: 'AWS' },
+            { name: 'Rori April L', skill: 'Network, CCNA' },
+            { name: 'Daniel Datulong', skill: 'Network, CCNA' },
+            { name: 'Herdianto', skill: 'Network, CCNA' },
+            { name: 'Adrian', skill: 'Graphic Design' },
+            { name: 'Nathalia Gunarian', skill: 'Graphic Design' },
+            { name: 'Herman', skill: 'Graphic Design' },
+            { name: 'Abdul Basit', skill: 'Graphic Design' },
+            { name: 'Yacob Utama', skill: 'Digital Marketing' },
+            { name: 'Azdin Akbar', skill: 'Digital Marketing' },
+            { name: 'Setiadi', skill: 'Digital Marketing' },
+            { name: 'Yusuf', skill: 'Design, Canva' },
+            { name: 'Benedict Epifani Janoko', skill: '3D Animasi' },
+            { name: 'Tan Gunawan', skill: 'Brevet' },
+            { name: 'Steven Orlando', skill: 'Brevet' },
+            { name: 'Rizky Darma', skill: 'Brevet' },
+            { name: 'Sebastian Prasetya', skill: 'Brevet' },
+            { name: 'Thio Helny', skill: 'Brevet' },
+            { name: 'Evina Sandy', skill: 'Brevet' },
+            { name: 'M. Rio Aditya L.', skill: 'Brevet' },
+            { name: 'Ardiansyah Nur Septian', skill: 'Brevet' },
+            { name: 'Thio Jemmi Sutiono', skill: 'Brevet' },
+            { name: 'Bayu Setyo Winarno', skill: 'Brevet' },
+            { name: 'Join Wan Chanlyn', skill: 'Java Programming, Machine Learning, AI' },
+            { name: 'Annisa Wulandari', skill: 'Python, Machine Learning' },
+            { name: 'Yunata Gunawan', skill: 'Machine Learning, AI, Data Analyst' },
+            { name: 'Zulkarmen', skill: 'Programming, C++' },
+            { name: 'Ivanov Adie', skill: 'C++, C#, Javascript' },
+            { name: 'Rachmat Rizkihadi', skill: 'Java Springboot, PHP' },
+            { name: 'Agus Sulaiman', skill: 'Python, Java, C++' },
+            { name: 'Frans Sinata', skill: 'Python, Java, C++' },
+            { name: 'Syaiful Andy', skill: 'Python, Cyber Security' },
+            { name: 'Hasan Basri', skill: 'Python, NodeJs, Javascript' },
+            { name: 'M. Ridwan Maulana', skill: 'Data Analyst, Python, Power BI' },
+            { name: 'Riki Setiyo Pambudi', skill: 'NodeJs, Javascript' },
+            { name: 'M. Arya Dhika', skill: 'Figma' }
+        ]);
+        addMarker(-6.2383, 106.9756, 'Bekasi', 4, [
+            { name: 'Niko Saputra', skill: 'English for Business' },
+            { name: 'Poltak Elfrisko', skill: 'Design' },
+            { name: 'Reza Syairozi', skill: 'After Effect' },
+            { name: 'Mahda Karina', skill: 'Brevet' }
+        ]);
+        addMarker(-6.5969, 106.7972, 'Bogor', 2, [
+            { name: 'Andry Yuriandi', skill: 'English for Business' },
+            { name: 'Sakti Darmala', skill: 'Solidwork' }
+        ]);
+        addMarker(-6.2024, 106.6527, 'Tangerang', 5, [
+            { name: 'Mona Intariani', skill: 'English' },
+            { name: 'Didi Subekti', skill: 'Office, VBA Macro' },
+            { name: 'Iswanto', skill: 'Java, C++, C#' },
+            { name: 'Donny Akhmad Septa Utama', skill: 'PHP, Laravel' },
+            { name: 'Hendro Steven', skill: 'Java, NodeJs, ReactJs' }
+        ]);
+        addMarker(-7.7956, 110.3695, 'Yogyakarta', 2, [
+            { name: 'Masterina Meta', skill: 'English for Business' },
+            { name: 'Aruna Pandu', skill: 'Korean Language' }
+        ]);
+        addMarker(-5.4500, 105.2663, 'Lampung', 2, [
+            { name: 'M. Idi', skill: 'English, Softskill Pedagogy' },
+            { name: 'Anjas Syaiful', skill: 'Blender, Unity' }
+        ]);
+        addMarker(-0.5022, 117.1536, 'Samarinda', 1, [
+            { name: 'Yudi Susanto', skill: 'Brevet' }
+        ]);
+        addMarker(-6.9667, 110.4167, 'Semarang', 1, [
+            { name: 'Gustyana Indrasmitha', skill: 'HR, Project Management' }
+        ]);
+    </script>
 </body>
-<script>
-    
-    
-            var map_71ff6b9f428616c5022917b8acc33301 = L.map(
-                "map_71ff6b9f428616c5022917b8acc33301",
-                {
-                    center: [-2.5, 118.0],
-                    crs: L.CRS.EPSG3857,
-                    zoom: 5,
-                    zoomControl: true,
-                    preferCanvas: false,
-                }
-            );
 
-            
-
-        
-    
-            var tile_layer_a8b0843786ef2f5a359361a34831655a = L.tileLayer(
-                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                {"attribution": "Data by \u0026copy; \u003ca href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-            var marker_3086e17ce967c9638b891a24f0505b4e = L.marker(
-                [-6.9175, 107.6191],
-                {}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-        var popup_60552859f16b6a34ab95aed43eee5955 = L.popup({"maxWidth": 300});
-
-        
-            var html_06af4561cfd273be41304466aaaf4872 = $(`<div id="html_06af4561cfd273be41304466aaaf4872" style="width: 100.0%; height: 100.0%;"><b>City:</b> Bandung<br><b>Count:</b> 1<br><div style='overflow-y: auto; max-height: 150px; border: 1px solid #ddd;'><table border="1" class="dataframe">   <thead>     <tr style="text-align: right;">       <th>Nama</th>       <th>Skill</th>     </tr>   </thead>   <tbody>     <tr>       <td>Rahmat Pradana</td>       <td>English for Business</td>     </tr>   </tbody> </table></div></div>`)[0];
-            popup_60552859f16b6a34ab95aed43eee5955.setContent(html_06af4561cfd273be41304466aaaf4872);
-        
-
-        marker_3086e17ce967c9638b891a24f0505b4e.bindPopup(popup_60552859f16b6a34ab95aed43eee5955)
-        ;
-
-        
-    
-    
-            marker_3086e17ce967c9638b891a24f0505b4e.bindTooltip(
-                `<div>
-                     Bandung
-                 </div>`,
-                {"sticky": true}
-            );
-        
-    
-            var marker_99359df6bc976e4bb3f29f17da021e0b = L.marker(
-                [-6.2383, 106.9756],
-                {}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-        var popup_3ed705deaf0d0bbaf9b25f1146bf1287 = L.popup({"maxWidth": 300});
-
-        
-            var html_79a767475ea516be0efc1619c5d2d8c5 = $(`<div id="html_79a767475ea516be0efc1619c5d2d8c5" style="width: 100.0%; height: 100.0%;"><b>City:</b> Bekasi<br><b>Count:</b> 4<br><div style='overflow-y: auto; max-height: 150px; border: 1px solid #ddd;'><table border="1" class="dataframe">   <thead>     <tr style="text-align: right;">       <th>Nama</th>       <th>Skill</th>     </tr>   </thead>   <tbody>     <tr>       <td>Niko Saputra</td>       <td>English for Business</td>     </tr>     <tr>       <td>Poltak Elfrisko</td>       <td>Design</td>     </tr>     <tr>       <td>Reza Syairozi</td>       <td>After Effect</td>     </tr>     <tr>       <td>Mahda Karina</td>       <td>Brevet</td>     </tr>   </tbody> </table></div></div>`)[0];
-            popup_3ed705deaf0d0bbaf9b25f1146bf1287.setContent(html_79a767475ea516be0efc1619c5d2d8c5);
-        
-
-        marker_99359df6bc976e4bb3f29f17da021e0b.bindPopup(popup_3ed705deaf0d0bbaf9b25f1146bf1287)
-        ;
-
-        
-    
-    
-            marker_99359df6bc976e4bb3f29f17da021e0b.bindTooltip(
-                `<div>
-                     Bekasi
-                 </div>`,
-                {"sticky": true}
-            );
-        
-    
-            var marker_e79e4aac2d3c26d76e3264627329ddb0 = L.marker(
-                [-6.5969, 106.7972],
-                {}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-        var popup_8e0bf29144461857bde59b1a6ce82fa6 = L.popup({"maxWidth": 300});
-
-        
-            var html_c5dc58e0630620a592da1a762068a203 = $(`<div id="html_c5dc58e0630620a592da1a762068a203" style="width: 100.0%; height: 100.0%;"><b>City:</b> Bogor<br><b>Count:</b> 2<br><div style='overflow-y: auto; max-height: 150px; border: 1px solid #ddd;'><table border="1" class="dataframe">   <thead>     <tr style="text-align: right;">       <th>Nama</th>       <th>Skill</th>     </tr>   </thead>   <tbody>     <tr>       <td>Andry Yuriandi</td>       <td>English for Business</td>     </tr>     <tr>       <td>Sakti Darmala</td>       <td>Solidwork</td>     </tr>   </tbody> </table></div></div>`)[0];
-            popup_8e0bf29144461857bde59b1a6ce82fa6.setContent(html_c5dc58e0630620a592da1a762068a203);
-        
-
-        marker_e79e4aac2d3c26d76e3264627329ddb0.bindPopup(popup_8e0bf29144461857bde59b1a6ce82fa6)
-        ;
-
-        
-    
-    
-            marker_e79e4aac2d3c26d76e3264627329ddb0.bindTooltip(
-                `<div>
-                     Bogor
-                 </div>`,
-                {"sticky": true}
-            );
-        
-    
-            var marker_2f3007e7bca9af3f7e1ca6d4e7bdabd3 = L.marker(
-                [-6.872, 107.5421],
-                {}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-        var popup_96c309308e130dcec362bf5479e40326 = L.popup({"maxWidth": 300});
-
-        
-            var html_a81a48caba475f89767407ef7c67d53d = $(`<div id="html_a81a48caba475f89767407ef7c67d53d" style="width: 100.0%; height: 100.0%;"><b>City:</b> Cimahi<br><b>Count:</b> 1<br><div style='overflow-y: auto; max-height: 150px; border: 1px solid #ddd;'><table border="1" class="dataframe">   <thead>     <tr style="text-align: right;">       <th>Nama</th>       <th>Skill</th>     </tr>   </thead>   <tbody>     <tr>       <td>Siti Aminah</td>       <td>English</td>     </tr>   </tbody> </table></div></div>`)[0];
-            popup_96c309308e130dcec362bf5479e40326.setContent(html_a81a48caba475f89767407ef7c67d53d);
-        
-
-        marker_2f3007e7bca9af3f7e1ca6d4e7bdabd3.bindPopup(popup_96c309308e130dcec362bf5479e40326)
-        ;
-
-        
-    
-    
-            marker_2f3007e7bca9af3f7e1ca6d4e7bdabd3.bindTooltip(
-                `<div>
-                     Cimahi
-                 </div>`,
-                {"sticky": true}
-            );
-        
-    
-            var marker_38b91aa828e16df2f090787d1f7a1d36 = L.marker(
-                [-6.2088, 106.8456],
-                {}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-        var popup_6266f1f389103ea538784355c282eb7b = L.popup({"maxWidth": 300});
-
-        
-            var html_d5221237071e19ed28eef9b6fdfb90ed = $(`<div id="html_d5221237071e19ed28eef9b6fdfb90ed" style="width: 100.0%; height: 100.0%;"><b>City:</b> Jakarta<br><b>Count:</b> 57<br><div style='overflow-y: auto; max-height: 150px; border: 1px solid #ddd;'><table border="1" class="dataframe">   <thead>     <tr style="text-align: right;">       <th>Nama</th>       <th>Skill</th>     </tr>   </thead>   <tbody>     <tr>       <td>Yani Suiswadi Rusdy</td>       <td>English</td>     </tr>     <tr>       <td>Nelly Budiarjo</td>       <td>English</td>     </tr>     <tr>       <td>Arditya Laksono</td>       <td>English</td>     </tr>     <tr>       <td>Floreance Sahertian</td>       <td>English for Business</td>     </tr>     <tr>       <td>Raden Nur Prasetyo</td>       <td>English</td>     </tr>     <tr>       <td>Indriani Putri Utami</td>       <td>English, Excel, Word, PPT</td>     </tr>     <tr>       <td>Kiki Soraya</td>       <td>English</td>     </tr>     <tr>       <td>Halimun Purnama</td>       <td>Mandarin</td>     </tr>     <tr>       <td>Yufan Dalius</td>       <td>Mandarin</td>     </tr>     <tr>       <td>Mardiana</td>       <td>Marketing</td>     </tr>     <tr>       <td>Putri Nur Hikmah</td>       <td>Softskill Pedagogy</td>     </tr>     <tr>       <td>Fransiska Hanita</td>       <td>Accounting, Excel, tax</td>     </tr>     <tr>       <td>Mega Amalia</td>       <td>Accounting, Excel, tax</td>     </tr>     <tr>       <td>Fahmi Hasan</td>       <td>Office, PPT</td>     </tr>     <tr>       <td>Panca Octavia</td>       <td>Excel, Word, PPT</td>     </tr>     <tr>       <td>Ali Baroroh</td>       <td>Power BI, Office, Dashboard</td>     </tr>     <tr>       <td>Yohan Mulyono</td>       <td>CEH</td>     </tr>     <tr>       <td>Aditya Kurniawan</td>       <td>CEH</td>     </tr>     <tr>       <td>Kevin</td>       <td>CEH</td>     </tr>     <tr>       <td>Santoso Budijono</td>       <td>AWS</td>     </tr>     <tr>       <td>Richard Win</td>       <td>AWS</td>     </tr>     <tr>       <td>Ivan Sebastian</td>       <td>AWS</td>     </tr>     <tr>       <td>Rori April L</td>       <td>Network, CCNA</td>     </tr>     <tr>       <td>Daniel Datulong</td>       <td>Network, CCNA</td>     </tr>     <tr>       <td>Herdianto</td>       <td>Network, CCNA</td>     </tr>     <tr>       <td>Adrian</td>       <td>Graphic Design</td>     </tr>     <tr>       <td>Nathalia Gunarian</td>       <td>Graphic Design</td>     </tr>     <tr>       <td>Herman</td>       <td>Graphic Design</td>     </tr>     <tr>       <td>Abdul Basit</td>       <td>Graphic Design</td>     </tr>     <tr>       <td>Yacob Utama</td>       <td>Digital Marketing</td>     </tr>     <tr>       <td>Azdin Akbar</td>       <td>Digital Marketing</td>     </tr>     <tr>       <td>Setiadi</td>       <td>Digital Marketing</td>     </tr>     <tr>       <td>Yusuf</td>       <td>Design, Canva</td>     </tr>     <tr>       <td>Benedict Epifani Janoko</td>       <td>3D Animasi</td>     </tr>     <tr>       <td>Tan Gunawan</td>       <td>Brevet</td>     </tr>     <tr>       <td>Steven Orlando</td>       <td>Brevet</td>     </tr>     <tr>       <td>Rizky Darma</td>       <td>Brevet</td>     </tr>     <tr>       <td>Sebastian Prasetya</td>       <td>Brevet</td>     </tr>     <tr>       <td>Thio Helny</td>       <td>Brevet</td>     </tr>     <tr>       <td>Evina Sandy</td>       <td>Brevet</td>     </tr>     <tr>       <td>M. Rio Aditya L.</td>       <td>Brevet</td>     </tr>     <tr>       <td>Ardiansyah Nur Septian</td>       <td>Brevet</td>     </tr>     <tr>       <td>Thio Jemmi Sutiono</td>       <td>Brevet</td>     </tr>     <tr>       <td>Bayu Setyo Winarno</td>       <td>Brevet</td>     </tr>     <tr>       <td>Join Wan Chanlyn</td>       <td>Java Programming, Machine Learning, AI</td>     </tr>     <tr>       <td>Annisa Wulandari</td>       <td>Python, Machine Learning</td>     </tr>     <tr>       <td>Yunata Gunawan</td>       <td>Machine Learning, AI, Data Analyst</td>     </tr>     <tr>       <td>Zulkarmen</td>       <td>Programming, C++</td>     </tr>     <tr>       <td>Ivanov Adie</td>       <td>C++, C#, Javascript</td>     </tr>     <tr>       <td>Rachmat Rizkihadi</td>       <td>Java Springboot, PHP</td>     </tr>     <tr>       <td>Agus Sulaiman</td>       <td>Python, Java, C++</td>     </tr>     <tr>       <td>Frans Sinata</td>       <td>Python, Java, C++</td>     </tr>     <tr>       <td>Syaiful Andy</td>       <td>Python, Cyber Security</td>     </tr>     <tr>       <td>Hasan Basri</td>       <td>Python, NodeJs, Javascript</td>     </tr>     <tr>       <td>M. Ridwan Maulana</td>       <td>Data analyst, Python, Power BI</td>     </tr>     <tr>       <td>Riki Setiyo Pambudi</td>       <td>NodeJs, Javascript</td>     </tr>     <tr>       <td>M. Arya Dhika</td>       <td>Figma</td>     </tr>   </tbody> </table></div></div>`)[0];
-            popup_6266f1f389103ea538784355c282eb7b.setContent(html_d5221237071e19ed28eef9b6fdfb90ed);
-        
-
-        marker_38b91aa828e16df2f090787d1f7a1d36.bindPopup(popup_6266f1f389103ea538784355c282eb7b)
-        ;
-
-        
-    
-    
-            marker_38b91aa828e16df2f090787d1f7a1d36.bindTooltip(
-                `<div>
-                     Jakarta
-                 </div>`,
-                {"sticky": true}
-            );
-        
-    
-            var marker_8e1aac13af8292259e01bd0dc75924d6 = L.marker(
-                [-5.45, 105.2663],
-                {}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-        var popup_7cc827a2f6b098521ceaf336f72ae382 = L.popup({"maxWidth": 300});
-
-        
-            var html_d0eb78ac6fd93b18cf64cb23884e9bf2 = $(`<div id="html_d0eb78ac6fd93b18cf64cb23884e9bf2" style="width: 100.0%; height: 100.0%;"><b>City:</b> Lampung<br><b>Count:</b> 1<br><div style='overflow-y: auto; max-height: 150px; border: 1px solid #ddd;'><table border="1" class="dataframe">   <thead>     <tr style="text-align: right;">       <th>Nama</th>       <th>Skill</th>     </tr>   </thead>   <tbody>     <tr>       <td>Dewi Kartini</td>       <td>English</td>     </tr>   </tbody> </table></div></div>`)[0];
-            popup_7cc827a2f6b098521ceaf336f72ae382.setContent(html_d0eb78ac6fd93b18cf64cb23884e9bf2);
-        
-
-        marker_8e1aac13af8292259e01bd0dc75924d6.bindPopup(popup_7cc827a2f6b098521ceaf336f72ae382)
-        ;
-
-        
-    
-    
-            marker_8e1aac13af8292259e01bd0dc75924d6.bindTooltip(
-                `<div>
-                     Lampung
-                 </div>`,
-                {"sticky": true}
-            );
-        
-    
-            var marker_15c8065c46277dd90e1f2bd7f6f9a205 = L.marker(
-                [-0.5022, 117.1536],
-                {}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-        var popup_ebdd2828ef8d4bfc0c064c4be66370e2 = L.popup({"maxWidth": 300});
-
-        
-            var html_b1320e07a8d99732115d8b8c4694e6aa = $(`<div id="html_b1320e07a8d99732115d8b8c4694e6aa" style="width: 100.0%; height: 100.0%;"><b>City:</b> Samarinda<br><b>Count:</b> 1<br><div style='overflow-y: auto; max-height: 150px; border: 1px solid #ddd;'><table border="1" class="dataframe">   <thead>     <tr style="text-align: right;">       <th>Nama</th>       <th>Skill</th>     </tr>   </thead>   <tbody>     <tr>       <td>Budi Santoso</td>       <td>English for Business</td>     </tr>   </tbody> </table></div></div>`)[0];
-            popup_ebdd2828ef8d4bfc0c064c4be66370e2.setContent(html_b1320e07a8d99732115d8b8c4694e6aa);
-        
-
-        marker_15c8065c46277dd90e1f2bd7f6f9a205.bindPopup(popup_ebdd2828ef8d4bfc0c064c4be66370e2)
-        ;
-
-        
-    
-    
-            marker_15c8065c46277dd90e1f2bd7f6f9a205.bindTooltip(
-                `<div>
-                     Samarinda
-                 </div>`,
-                {"sticky": true}
-            );
-        
-    
-            var marker_1860af5ed2a65d50979cae44aca1f2fe = L.marker(
-                [-6.9667, 110.4167],
-                {}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-        var popup_bf39c0c0e27d857abe039515b7e806b5 = L.popup({"maxWidth": 300});
-
-        
-            var html_19772d11d7fef7f9d71404863d36563f = $(`<div id="html_19772d11d7fef7f9d71404863d36563f" style="width: 100.0%; height: 100.0%;"><b>City:</b> Semarang<br><b>Count:</b> 1<br><div style='overflow-y: auto; max-height: 150px; border: 1px solid #ddd;'><table border="1" class="dataframe">   <thead>     <tr style="text-align: right;">       <th>Nama</th>       <th>Skill</th>     </tr>   </thead>   <tbody>     <tr>       <td>Anita Kusuma</td>       <td>English</td>     </tr>   </tbody> </table></div></div>`)[0];
-            popup_bf39c0c0e27d857abe039515b7e806b5.setContent(html_19772d11d7fef7f9d71404863d36563f);
-        
-
-        marker_1860af5ed2a65d50979cae44aca1f2fe.bindPopup(popup_bf39c0c0e27d857abe039515b7e806b5)
-        ;
-
-        
-    
-    
-            marker_1860af5ed2a65d50979cae44aca1f2fe.bindTooltip(
-                `<div>
-                     Semarang
-                 </div>`,
-                {"sticky": true}
-            );
-        
-    
-            var marker_23196c731566dcd3b3384c1329d20601 = L.marker(
-                [-6.2024, 106.6527],
-                {}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-        var popup_bc57e082387523008e82e883e6b704ba = L.popup({"maxWidth": 300});
-
-        
-            var html_8e615d78f5fa531a265b3ea05105ac72 = $(`<div id="html_8e615d78f5fa531a265b3ea05105ac72" style="width: 100.0%; height: 100.0%;"><b>City:</b> Tangerang<br><b>Count:</b> 5<br><div style='overflow-y: auto; max-height: 150px; border: 1px solid #ddd;'><table border="1" class="dataframe">   <thead>     <tr style="text-align: right;">       <th>Nama</th>       <th>Skill</th>     </tr>   </thead>   <tbody>     <tr>       <td>Mona Intariani</td>       <td>English</td>     </tr>     <tr>       <td>Didi Subekti</td>       <td>Office, VBA Macro</td>     </tr>     <tr>       <td>Iswanto</td>       <td>Java, C++, C#</td>     </tr>     <tr>       <td>Donny Akhmad Septa Utama</td>       <td>PHP, Laravel</td>     </tr>     <tr>       <td>Hendro Steven</td>       <td>Java, NodeJs, ReactJs</td>     </tr>   </tbody> </table></div></div>`)[0];
-            popup_bc57e082387523008e82e883e6b704ba.setContent(html_8e615d78f5fa531a265b3ea05105ac72);
-        
-
-        marker_23196c731566dcd3b3384c1329d20601.bindPopup(popup_bc57e082387523008e82e883e6b704ba)
-        ;
-
-        
-    
-    
-            marker_23196c731566dcd3b3384c1329d20601.bindTooltip(
-                `<div>
-                     Tangerang
-                 </div>`,
-                {"sticky": true}
-            );
-        
-    
-            var marker_062ee1ffe27be39778b6c5d1cdda4ed3 = L.marker(
-                [-7.7956, 110.3695],
-                {}
-            ).addTo(map_71ff6b9f428616c5022917b8acc33301);
-        
-    
-        var popup_3b86f3343172a18e9b0471ccd7f89dfb = L.popup({"maxWidth": 300});
-
-        
-            var html_c931001acba2a7ba948cd66c17b20a44 = $(`<div id="html_c931001acba2a7ba948cd66c17b20a44" style="width: 100.0%; height: 100.0%;"><b>City:</b> Yogyakarta<br><b>Count:</b> 2<br><div style='overflow-y: auto; max-height: 150px; border: 1px solid #ddd;'><table border="1" class="dataframe">   <thead>     <tr style="text-align: right;">       <th>Nama</th>       <th>Skill</th>     </tr>   </thead>   <tbody>     <tr>       <td>Masterina Meta</td>       <td>English for Business</td>     </tr>     <tr>       <td>Aruna Pandu</td>       <td>Korea</td>     </tr>   </tbody> </table></div></div>`)[0];
-            popup_3b86f3343172a18e9b0471ccd7f89dfb.setContent(html_c931001acba2a7ba948cd66c17b20a44);
-        
-
-        marker_062ee1ffe27be39778b6c5d1cdda4ed3.bindPopup(popup_3b86f3343172a18e9b0471ccd7f89dfb)
-        ;
-
-        
-    
-    
-            marker_062ee1ffe27be39778b6c5d1cdda4ed3.bindTooltip(
-                `<div>
-                     Yogyakarta
-                 </div>`,
-                {"sticky": true}
-            );
-        
-</script>
 </html>
